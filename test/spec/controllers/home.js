@@ -5,8 +5,7 @@ describe('Controller: HomeCtrl', function () {
   // load the controller's module
   beforeEach(module('hearthstoneApp'));
 
-  var HomeCtrl,
-    scope;
+  var scope;
 
   // Initialize the controller and a mock scope
   beforeEach(inject(function ($controller, $rootScope) {
