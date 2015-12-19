@@ -1,3 +1,38 @@
 <!DOCTYPE html>
-<div ng-include="'views/navbar.html'"></div>
-<p>This is the login view.</p>
+<div class="container">
+  <div class="row">
+    <div class="col-sm-6">
+      <h1>Hearthstone Deck Builder</h1>
+      <form class="form" name="form" novalidate>
+        <div class="form-group">
+          <label>Username</label>
+          <input class="form-control" type="text" name="username" ng-model="user.username">
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <input class="form-control" type="password" name="password" ng-model="user.password">
+        </div>
+
+        <div class="form-group has-error">
+          <p class="help-block" ng-show="submitted">
+            Please enter a username and password
+          </p>
+          <p class="help-block">
+            {{ errors.other }}
+          </p>
+        </div>
+
+        <div>
+          <button ng-click="login(form)" class="btn btn-primary btn-lg btn-login">
+            Login
+          </button>
+
+          <button ng-click="signUp(form)" class="btn btn-primary btn-lg btn-login">
+            Sign Up
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
