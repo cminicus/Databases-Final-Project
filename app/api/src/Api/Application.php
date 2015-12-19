@@ -12,6 +12,12 @@ class Application extends Slim
     public $configDirectory;
     public $config;
 
+    $dbhost = 'us-cdbr-iron-east-03.cleardb.net';
+    $dbuser = 'b81fae531e0b8e';
+    $dbpass = '5b2cbbd2';
+    $dbname = 'heroku_86ad99128ce745f';
+    $conn = new mysqli($dbhost, $dbuser, $dbpass, $dbname);
+
     protected function initConfig()
     {
         $config = array();
