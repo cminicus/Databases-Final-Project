@@ -65,6 +65,21 @@ class Application extends Slim
 
         $this->get('/createuser/:username/:password', function ($username, $password) {
             $jsonData = createUser($username, $password);
+            if($jsonData === "Error: Username already exists"){
+
+            }
+            $this->response->headers->set('Content-Type', 'application/json');
+            $this->response->setBody($jsonData);
+        });
+
+        $this->get('/login/:username/:password', function ($username, $password) {
+            $jsonData = login($username, $password);
+            $this->response->headers->set('Content-Type', 'application/json');
+            $this->response->setBody($jsonData);
+        });
+
+        $this->get('/getdeckcards/:deckID', function ($deckID) {
+            $jsonData = getDeckCards($deckID);
             $this->response->headers->set('Content-Type', 'application/json');
             $this->response->setBody($jsonData);
         });
@@ -123,10 +138,59 @@ class Application extends Slim
                            $newRow['userID'] = $row[0];
                            $newRow['username'] = $row[1];
                         }
+                        $myArray[] = $newRow;
                     }
-                    $myArray[] = $newRow;
                 }
             }   while ($conn->next_result());
+        }
+        else {
+            printf("<br>Error: %s\n", $conn->error);
+        }
+        return json_encode($myArray);
+    }
+
+    public function login($username, $password)
+    {
+        $myArray = array();
+        if($conn->multi_query("call Login('" . $username . "', '" . $password . "');")){
+            do {
+                if($result = $conn->store_result()){
+                    $newRow = array();
+                    while($row = $result->fetch_row()){
+                        if($row === "Error: Username already exists"){
+                          return $row;
+                        } else{
+                           $newRow['userID'] = $row[0];
+                           $newRow['username'] = $row[1];
+                        }
+                        $myArray[] = $newRow;
+                    }
+                }
+            }   while ($conn->next_result());
+        }
+        else {
+            printf("<br>Error: %s\n", $conn->error);
+        }
+        return json_encode($myArray);
+    }
+
+    public function getDeckCards($deckID)
+    {
+        $myArray = array();
+        if($conn->multi_query("call GetDeckCards('" . $deckID . "');")){
+            do {
+                if($result = $conn->store_result()){
+                    $newRow = array();
+                    while($row = $result->fetch_row()){
+                        if($row === "Error: Not a Valid Deck"){
+                            return $row;
+                        } else{
+                            $newRow['cardID'] = $row[0];
+                        }
+                        $myArray[] = $newRow;
+                    }
+                }   
+            } while ($conn->next_result());
         }
         else {
             printf("<br>Error: %s\n", $conn->error);
