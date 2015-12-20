@@ -243,11 +243,29 @@ class Application extends Slim
     }
 
     public function createDeck($userID, $deckName, $heroID) {
-        if ($result = mysqli_query($this->conn, "call CreateDeck('" . $userID . "','" . $deckName . "', '" . $heroID . "');")) {
-            while ($row = mysqli_fetch_row($result)) {
-                return $row[0];
+        $deck = array();
+        if($conn->multi_query("call CreateDeck('" . $userID . "','" . $deckName . "','" . $heroID . "');")){
+        do {
+            if($result = $conn->store_result()){
+                $newRow = array();
+                while($row = $result->fetch_row()){
+                    if($row === "Error: Not a Valid Deck"){
+                        return $row[0];
+                    } else{
+                        $newRow['deckID'] = $row[0];
+                        $newRow['heroID'] = $row[1];
+                        $newRow['heroImg'] = $row[2];
+                        $newRow['deckName'] = $row[3];
+                    }
+                    $deck[] = $newRow;
+                }
             }
-        }
+            return $deck;   
+        } while ($conn->next_result());
+    }
+    else {
+        printf("<br>Error: %s\n", $conn->error);
+    }
     }
 
     public function deleteDeck($deckID)
