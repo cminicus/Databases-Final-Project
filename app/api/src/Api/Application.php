@@ -209,18 +209,34 @@ class Application extends Slim
 
     public function getDeckCards($deckID) {
         $cards = array();
-        if ($result = mysqli_query($this->conn, "call GetDeckCards('" . $deckID . "');")) {
-            while ($row = mysqli_fetch_row($result)) {
-                $newRow = array();
-                if ($row[0] === "Error: Not a Valid Deck") {
-                    return $row[0];
-                } else {
-                  $newRow['cardID'] = $row[0];
-                }
-                $cards[] = $newRow;
-            }
+        if($conn->multi_query("call GetDeckCards('" . $deckID . "');")){
+            do {
+                if($result = $conn->store_result()){
+                    $newRow = array();
+                    while($row = $result->fetch_row()){
+                        if($row === "Error: Not a Valid Deck"){
+                            echo $row[0];
+                        } else{
+                            $newRow['cardID'] = $row[0];
+                            $newRow['expansionID'] = $row[1];
+                            $newRow['manaCost'] = $row[2];
+                            $newRow['name'] = $row[3];
+                            $newRow['classID'] = $row[4];
+                            $newRow['rarity'] = $row[5];
+                            $newRow['img'] = $row[6];
+                            $newRow['imgGold'] = $row[7];
+                            $newRow['cardType'] = $row[8];
+                            $newRow['cardText'] = $row[9];
+                        }
+                        $cards[] = $newRow;
+                    }
+                }   
+            } while ($conn->next_result());
         }
         return $cards;
+        else {
+            printf("<br>Error: %s\n", $conn->error);
+        }
     }
 
     public function getUserDecks($userID) {
