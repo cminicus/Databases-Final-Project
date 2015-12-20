@@ -32,28 +32,19 @@ angular.module('hearthstoneApp')
 
         $http.get('/api/createuser/' + user.username + '/' + user.password)
         .success(function(data) {
-          console.log('success');
           console.log(data);
-          console.log(data["userID"]);
           currentUser = data;
           deferred.resolve(data);
           $location.path('/');
           return cb();
         })
         .error(function(error) {
-          console.log('error');
           console.log(error);
           this.logOut();
           deferred.reject(error);
           return cb(error);
         }.bind(this));
-
-        // currentUser = {
-        //   'username': 'Tyler',
-        //   'password': 'yo',
-        //   'userID': 1
-        // }
-        // $location.path('/');
+        
         return deferred.promise;
       },
 

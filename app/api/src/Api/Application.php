@@ -73,8 +73,8 @@ class Application extends Slim
 
         $this->get('/createuser/:username/:password', function ($username, $password) {
             $userData = $this->createUser($username, $password);
-            if($userData === "Error: Username already exists"){
-
+            if ($userData === "Error: Username already exists") {
+              $this->response->setStatus(500);
             }
             echo json_encode($userData);
         });
@@ -135,26 +135,16 @@ class Application extends Slim
 
     public function createUser($username, $password) {
         $user = array();
-        if($result = mysqli_query($this->conn, "call CreateUser('" . $username . "', '" . $password . "');")) {
-            // $newRow = array();
-
-            // $row = mysqli_fetch_row($result);
-            // if($row === "Error: Username already exists") {
-            //     throw new Exception("Username already exists");
-            // } else {
-            //     $user['userID'] = $row[0];
-            //           //  $newRow['username'] = $row[1];
-            // }
-
-            while($row = mysqli_fetch_row($result)) {
-                if($row === "Error: Username already exists"){
-                    return $row;
+        if ($result = mysqli_query($this->conn, "call CreateUser('" . $username . "', '" . $password . "');")) {
+            while ($row = mysqli_fetch_row($result)) {
+                if ($row[0] === "Error: Username already exists") {
+                    return $row[0];
                 } else {
                     $user['userID'] = $row[0];
                     $user['username'] = $row[1];
                 }
           }
-          return $myArray;
+          return $user;
         }
     }
 
@@ -187,10 +177,11 @@ class Application extends Slim
     {
         $myArray = array();
         if($conn->multi_query("call Login('" . $username . "', '" . $password . "');")) {
-            do {
+            // do {
                 if($result = $conn->store_result()){
                     $newRow = array();
                     while($row = $result->fetch_row()){
+                      // can this happen?
                         if($row === "Error: Username already exists"){
                           return $row;
                         } else{
@@ -200,11 +191,7 @@ class Application extends Slim
                         $myArray[] = $newRow;
                     }
                 }
-            }
-                // }
-            // } while (mysqli_more_results($this->conn));
-              // while (mysqli_next_result($this->conn));
-              // while ($this->conn->next_result());
+            // }
         } else {
             // printf("<br>Error: %s\n", $this->conn->error);
         }
