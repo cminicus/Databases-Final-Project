@@ -71,3 +71,15 @@ body {
     border-bottom: 0;
   }
 }
+
+#deck-builder-search {
+  border-right: 1px solid #AAA;
+}
+
+#deck-builder-header {
+  border-bottom: 1px solid #AAA;
+}
+
+.deck-builder-chart-title {
+  padding-top: 10px;
+}
