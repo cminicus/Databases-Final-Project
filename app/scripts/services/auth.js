@@ -8,7 +8,7 @@
  * Service in the deckApp.
  */
 angular.module('hearthstoneApp')
-  .service('Auth', function Auth($q, $location) {
+  .service('Auth', function Auth($q, $location, $http) {
     // AngularJS will instantiate a singleton by calling "new" on this function
     var currentUser = {};
 
@@ -26,17 +26,35 @@ angular.module('hearthstoneApp')
         return deffered.promise;
       },
 
-      signUp: function(user) {
-        var deffered = $q.defer();
-        // again make call to php script and save currentUser
-        console.log("signup");
-        currentUser = {
-          'username': 'Tyler',
-          'password': 'yo',
-          'userID': 1
-        }
-        $location.path('/');
-        return deffered.promise;
+      signUp: function(user, callback) {
+        var cb = callback || angular.noop;
+        var deferred = $q.defer();
+
+        $http.get('/api/createuser/' + user.username + '/' + user.password)
+        .success(function(data) {
+          console.log('success');
+          console.log(data);
+          console.log(data["userID"]);
+          currentUser = data;
+          deferred.resolve(data);
+          $location.path('/');
+          return cb();
+        })
+        .error(function(error) {
+          console.log('error');
+          console.log(error);
+          this.logOut();
+          deferred.reject(error);
+          return cb(error);
+        }.bind(this));
+
+        // currentUser = {
+        //   'username': 'Tyler',
+        //   'password': 'yo',
+        //   'userID': 1
+        // }
+        // $location.path('/');
+        return deferred.promise;
       },
 
       getCurrentUser: function() {

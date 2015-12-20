@@ -1,65 +1,69 @@
 <!DOCTYPE html>
 <div ng-include="'views/navbar.html'"></div>
 <div class="container">
+
   <div class="row" id="deck-builder-header">
     <h1>{{ deck.deckName }}</h1>
   </div>
+
   <div class="row">
     <div class="col-sm-8" id="deck-builder-search" style="height: 700px">
-      <p class="lead deck-builder-chart-title">
-        Search
-      </p>
+      <p class="lead deck-builder-chart-title">Search</p>
       <form class="form">
+
         <div class="form-group">
           <label>Card Name</label>
           <input class="form-control" type="text" name="cardName" placeholder="Card Name" ng-model="search.cardName">
         </div>
+
         <div class="row">
+
           <div class="form-group col-sm-3">
             <label>Mana Cost</label>
             <select class="form-control" name="manaCost" ng-model="search.manaCost">
               <option ng-repeat="option in manaOptions">{{option}}</option>
             </select>
           </div>
+
           <div class="form-group col-sm-3">
             <label>Card Type</label>
             <select class="form-control" name="cardType" ng-model="search.cardType">
               <option ng-repeat="option in cardTypeOptions">{{option}}</option>
             </select>
           </div>
+
           <div class="form-group col-sm-3">
             <label>Card Class</label>
             <select class="form-control" name="cardClass" ng-model="search.cardClass">
               <option ng-repeat="option in cardClassOptions" value="{{option.value}}">{{option.name}}</option>
             </select>
           </div>
+
           <div class="form-group col-sm-3">
             <label>Card Mechanic</label>
+            <!-- Change to be mechanics -->
             <select class="form-control" name="cardClass" ng-model="search.cardClass">
               <option ng-repeat="option in cardClassOptions" value="{{option.value}}">{{option.name}}</option>
             </select>
           </div>
+
         </div>
         <button ng-click="search(form)" class="btn btn-primary">Search</button>
       </form>
     </div>
 
     <div class="col-sm-4">
-      <p class="lead deck-builder-chart-title">
-        Mana Curve
-      </p>
+      <p class="lead deck-builder-chart-title">Mana Curve</p>
       <canvas id="bar" class="chart chart-bar"
         chart-data="manaData" chart-labels="manaLabels" chart-series="manaSeries">
       </canvas>
-      <p class="lead deck-builder-chart-title">
-        Deck Size
-      </p>
+
+      <p class="lead deck-builder-chart-title">Deck Size</p>
       <canvas id="doughnut" class="chart chart-doughnut"
         chart-data="doughnutData" chart-labels="doughnutLabels" chart-legend="true">
       </canvas>
-      <p class="lead deck-builder-chart-title">
-        Card Distribution
-      </p>
+
+      <p class="lead deck-builder-chart-title">Card Distribution</p>
       <canvas id="radar" class="chart chart-radar"
         chart-data="radarData" chart-labels="radarLabels">
       </canvas>

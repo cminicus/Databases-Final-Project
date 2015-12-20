@@ -16,6 +16,7 @@ angular.module('hearthstoneApp')
       'deckName': 'My Deck'
     }
 
+    // form filter options
     $scope.manaOptions = ['All', 0, 1, 2, 3, 4, 5, 6, 7, 8];
     $scope.cardTypeOptions = ['All', 'Minion', 'Spell', 'Weapon'];
     $scope.cardClassOptions = [{
@@ -50,18 +51,20 @@ angular.module('hearthstoneApp')
       'value': 'HERO_09'
     }];
 
+    // mana chart data
     $scope.manaLabels = ['0 Mana', '1 Mana', '2 Mana', '3 Mana', '4 Mana', '5 Mana', '6 Mana', '7 Mana', '8 Mana'];
     $scope.manaData = [[6, 10, 2, 8, 9, 10, 8, 1, 4]];
     $scope.manaSeries = ['Mana'];
 
+    // card total data
     $scope.doughnutLabels = ['Cards Used', 'Remaining Cards'];
     $scope.doughnutData = [20, 10];
 
+    // card type data
     $scope.radarLabels = ['Minions', 'Spells', 'Weapons'];
     $scope.radarData = [[20, 10, 15]];
 
     $scope.search = function(form) {
       console.log($scope.search);
     };
-
   });

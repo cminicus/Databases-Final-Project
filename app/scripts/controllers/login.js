@@ -23,8 +23,9 @@ angular.module('hearthstoneApp')
           username: $scope.user.username,
           password: $scope.user.password
         })
-        .then( function() {
+        .then(function(data) {
           // this does'nt actually work?? No promise being returned?
+          console.log('yoooooo');
           console.log($location);
           $location.path('/');
         })
@@ -42,7 +43,7 @@ angular.module('hearthstoneApp')
           username: $scope.user.username,
           password: $scope.user.password
         })
-        .then( function() {
+        .then(function() {
           // Account created, redirect to home
           $location.path('/');
         })

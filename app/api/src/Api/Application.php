@@ -12,11 +12,11 @@ class Application extends Slim
     public $configDirectory;
     public $config;
 
-    $dbhost = 'us-cdbr-iron-east-03.cleardb.net';
-    $dbuser = 'b81fae531e0b8e';
-    $dbpass = '5b2cbbd2';
-    $dbname = 'heroku_86ad99128ce745f';
-    $conn = new mysqli($dbhost, $dbuser, $dbpass, $dbname);
+    // $dbhost = 'us-cdbr-iron-east-03.cleardb.net';
+    // $dbuser = 'b81fae531e0b8e';
+    // $dbpass = '5b2cbbd2';
+    // $dbname = 'heroku_86ad99128ce745f';
+    private $conn;
 
     protected function initConfig()
     {
@@ -46,6 +46,14 @@ class Application extends Slim
         $this->configDirectory = __DIR__ . '/../../' . $configDirectory;
         $this->config = $this->initConfig();
 
+        $dbhost = 'us-cdbr-iron-east-03.cleardb.net';
+        $dbuser = 'b81fae531e0b8e';
+        $dbpass = '5b2cbbd2';
+        $dbname = 'heroku_86ad99128ce745f';
+
+        // $this->conn = new mysqli($dbhost, $dbuser, $dbpass, $dbname);
+        $this->conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
+
         // /features
         $this->get('/features', function () {
             $features = new Features($this->config['features']);
@@ -64,9 +72,8 @@ class Application extends Slim
         });
 
         $this->get('/createuser/:username/:password', function ($username, $password) {
-            $jsonData = createUser($username, $password);
-            $this->response->headers->set('Content-Type', 'application/json');
-            $this->response->setBody($jsonData);
+            $userData = $this->createUser($username, $password);
+            echo json_encode($userData);
         });
     }
 
@@ -109,28 +116,35 @@ class Application extends Slim
         return $this->response();
     }
 
-    public function createUser($username, $password)
-    {
-        $myArray = array();
-        if($conn->multi_query("call CreateUser('" . $username . "', '" . $password . "');")){
-            do {
-                if($result = $conn->store_result()){
-                    $newRow = array();
-                    while($row = $result->fetch_row()){
-                        if($row === "Error: Username already exists"){
-                          return $row;
-                        } else{
-                           $newRow['userID'] = $row[0];
-                           $newRow['username'] = $row[1];
-                        }
-                    }
-                    $myArray[] = $newRow;
+    public function createUser($username, $password) {
+        $user = array();
+        if($result = mysqli_query($this->conn, "call CreateUser('" . $username . "', '" . $password . "');")) {
+            // $newRow = array();
+
+            // $row = mysqli_fetch_row($result);
+            // if($row === "Error: Username already exists") {
+            //     throw new Exception("Username already exists");
+            // } else {
+            //     $user['userID'] = $row[0];
+            //           //  $newRow['username'] = $row[1];
+            // }
+
+            while($row = mysqli_fetch_row($result)){
+                if($row === "Error: Username already exists"){
+                    return $row;
+                } else {
+                    $user['userID'] = $row[0];
+                    $user['username'] = $row[1];
                 }
-            }   while ($conn->next_result());
+            }
+                // }
+            // } while (mysqli_more_results($this->conn));
+              // while (mysqli_next_result($this->conn));
+              // while ($this->conn->next_result());
+        } else {
+            // printf("<br>Error: %s\n", $this->conn->error);
         }
-        else {
-            printf("<br>Error: %s\n", $conn->error);
-        }
-        return json_encode($myArray);
+        // printf($user[0]);
+        return $user;
     }
 }
