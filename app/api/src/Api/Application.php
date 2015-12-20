@@ -92,6 +92,48 @@ class Application extends Slim
             // $this->response->setBody($jsonData);
             echo $jsonData;
         });
+
+        $this->get('/getuserdecks/:userID', function ($userID) {
+            $jsonData = getUserDecks($userID);
+            // $this->response->headers->set('Content-Type', 'application/json');
+            // $this->response->setBody($jsonData);
+            echo $jsonData;
+        });
+
+        $this->get('/createdeck/:userID/:deckName/:heroID', function ($userID, $deckName, $heroID) {
+            $jsonData = createDeck($userID,$deckName,$heroID);
+            // $this->response->headers->set('Content-Type', 'application/json');
+            // $this->response->setBody($jsonData);
+            echo $jsonData;
+        });
+
+        $this->get('/deletedeck/:deckID', function ($deckID) {
+            $jsonData = deleteDeck($deckID);
+            // $this->response->headers->set('Content-Type', 'application/json');
+            // $this->response->setBody($jsonData);
+            echo $jsonData;
+        });
+
+        $this->get('/renamedeck/:deckID/:newName', function ($deckID,$newName) {
+            $jsonData = renameDeck($deckID,$newName);
+            // $this->response->headers->set('Content-Type', 'application/json');
+            // $this->response->setBody($jsonData);
+            echo $jsonData;
+        });
+
+        $this->get('/addcardtodeck/:deckID/:cardID', function ($deckID,$cardID) {
+            $jsonData = addCardToDeck($deckID,$cardID);
+            // $this->response->headers->set('Content-Type', 'application/json');
+            // $this->response->setBody($jsonData);
+            echo $jsonData;
+        });
+
+        $this->get('/deletecardfromdeck/:deckID/:cardID', function ($deckID,$cardID) {
+            $jsonData = deleteCardFromDeck($deckID,$cardID);
+            // $this->response->headers->set('Content-Type', 'application/json');
+            // $this->response->setBody($jsonData);
+            echo $jsonData;
+        });
     }
 
     public function handleNotFound()
@@ -183,7 +225,7 @@ class Application extends Slim
                     while($row = $result->fetch_row()){
                       // can this happen?
                         if($row === "Error: Username already exists"){
-                          return $row;
+                          return $row[0];
                         } else{
                            $newRow['userID'] = $row[0];
                            $newRow['username'] = $row[1];
@@ -208,7 +250,7 @@ class Application extends Slim
                     $newRow = array();
                     while($row = $result->fetch_row()){
                         if($row === "Error: Not a Valid Deck"){
-                            return $row;
+                            return $row[0];
                         } else{
                             $newRow['cardID'] = $row[0];
                         }
@@ -221,5 +263,107 @@ class Application extends Slim
             printf("<br>Error: %s\n", $conn->error);
         }
         return json_encode($myArray);
+    }
+
+    public function getUserDecks($userID)
+    {
+        $myArray = array();
+        if($conn->multi_query("call GetUserDecks('" . $userID . "');")){
+            do {
+                if($result = $conn->store_result()){
+                    $newRow = array();
+                    while($row = $result->fetch_row()){
+                        if($row === "Error: Not a Valid Deck"){
+                            return $row[0];
+                        } else{
+                            $newRow['deckID'] = $row[0];
+                            $newRow['heroID'] = $row[1];
+                            $newRow['heroImg'] = $row[2];
+                            $newRow['deckName'] = $row[3];
+                        }
+                        $myArray[] = $newRow;
+                    }
+                }
+            } while ($conn->next_result());
+        }
+        else {
+            printf("<br>Error: %s\n", $conn->error);
+        }
+        return json_encode($myArray);
+    }
+
+    public function createDeck($userID,$deckName,$heroID)
+    {
+        if($conn->multi_query("call CreateDeck('" . $userID . "','" . $deckName . "', '" . $heroID . "');")){
+            do {
+                if($result = $conn->store_result()){
+                    $row = $result->fetch_row();
+                    return $row[0];
+                }
+            }   while ($conn->next_result());
+        }
+        else {
+            printf("<br>Error: %s\n", $conn->error);
+        }
+    }
+
+    public function deleteDeck($deckID)
+    {
+        if($conn->multi_query("call DeleteDeck('" . $deckID . "');")){
+            do {
+                if($result = $conn->store_result()){
+                    $row = $result->fetch_row();
+                    return $row[0];
+                }
+            }   while ($conn->next_result());
+        }
+        else {
+            printf("<br>Error: %s\n", $conn->error);
+        }
+    }
+
+    public function renameDeck($deckID,$newName)
+    {
+        if($conn->multi_query("call RenameDeck('" . $deckID . "','" . $newName . "');")){
+            do {
+                if($result = $conn->store_result()){
+                    $row = $result->fetch_row();
+                    return $row[0];
+                }
+            }   while ($conn->next_result());
+        }
+        else {
+            printf("<br>Error: %s\n", $conn->error);
+        }
+    }
+
+    public function addCardToDeck($deckID,$cardID)
+    {
+        if($conn->multi_query("call addCardToDeck('" . $deckID . "','" . $cardID . "');")){
+            do {
+                if($result = $conn->store_result()){
+                    $row = $result->fetch_row();
+                    return $row[0];
+                }
+            }   while ($conn->next_result());
+        }
+        else {
+            printf("<br>Error: %s\n", $conn->error);
+        }
+    }
+
+    public function deleteCardFromDeck($deckID,$cardID)
+    {
+        if($conn->multi_query("call DeleteCardFromDeck('" . $deckID . "','" . $cardID . "');")){
+            do {
+                if($result = $conn->store_result()){
+                    $row = $result->fetch_row();
+                    return $row[0];
+                }
+            }   while ($conn->next_result());
+        }
+        else {
+            printf("<br>Error: %s\n", $conn->error);
+        }
     }
 }
