@@ -71,6 +71,8 @@ class Application extends Slim
             $this->response->setBody(json_encode($feature));
         });
 
+
+
         $this->get('/createuser/:username/:password', function ($username, $password) {
             $userData = $this->createUser($username, $password);
             if ($userData === "Error: Username already exists") {
@@ -80,10 +82,11 @@ class Application extends Slim
         });
 
         $this->get('/login/:username/:password', function ($username, $password) {
-            $jsonData = login($username, $password);
-            // $this->response->headers->set('Content-Type', 'application/json');
-            // $this->response->setBody($jsonData);
-            echo $jsonData;
+            $userData = $this->login($username, $password);
+            if ($userData === "Incorrect Username/Password") {
+                $this->response->setStatus(500);
+            }
+            echo json_encode($userData);
         });
 
         $this->get('/getdeckcards/:deckID', function ($deckID) {
@@ -94,17 +97,16 @@ class Application extends Slim
         });
 
         $this->get('/getuserdecks/:userID', function ($userID) {
-            $jsonData = getUserDecks($userID);
-            // $this->response->headers->set('Content-Type', 'application/json');
-            // $this->response->setBody($jsonData);
-            echo $jsonData;
+            $deckData = $this->getUserDecks($userID);
+            if ($deckData === "Error: Not a valid User ID") {
+                $this->response->setStatus(500);
+            }
+            echo json_encode($deckData);
         });
 
         $this->get('/createdeck/:userID/:deckName/:heroID', function ($userID, $deckName, $heroID) {
-            $jsonData = createDeck($userID,$deckName,$heroID);
-            // $this->response->headers->set('Content-Type', 'application/json');
-            // $this->response->setBody($jsonData);
-            echo $jsonData;
+            $deckData = $this->createDeck($userID, $deckName, $heroID);
+            echo json_encode($deckData);
         });
 
         $this->get('/deletedeck/:deckID', function ($deckID) {
@@ -186,125 +188,65 @@ class Application extends Slim
                     $user['username'] = $row[1];
                 }
             }
-            return $user;
         }
-        // return here? Check for empty?
-    }
-
-    // public function createUser($username, $password)
-    // {
-    //     $myArray = array();
-    //     if($conn->multi_query("call CreateUser('" . $username . "', '" . $password . "');")){
-    //         do {
-    //             if($result = $conn->store_result()){
-    //                 $newRow = array();
-    //                 while($row = $result->fetch_row()){
-    //                     if($row === "Error: Username already exists"){
-    //                       return $row;
-    //                     } else{
-    //                        $newRow['userID'] = $row[0];
-    //                        $newRow['username'] = $row[1];
-    //                     }
-    //                     $myArray[] = $newRow;
-    //                 }
-    //             }
-    //         }   while ($conn->next_result());
-    //     }
-    //     else {
-    //         printf("<br>Error: %s\n", $conn->error);
-    //     }
-    //     return json_encode($myArray);
-    // }
-
-    public function login($username, $password)
-    {
-        $myArray = array();
-        if($conn->multi_query("call Login('" . $username . "', '" . $password . "');")) {
-            // do {
-                if($result = $conn->store_result()){
-                    $newRow = array();
-                    while($row = $result->fetch_row()){
-                      // can this happen?
-                        if($row === "Error: Username already exists"){
-                          return $row[0];
-                        } else{
-                           $newRow['userID'] = $row[0];
-                           $newRow['username'] = $row[1];
-                        }
-                        $myArray[] = $newRow;
-                    }
-                }
-            // }
-        } else {
-            // printf("<br>Error: %s\n", $this->conn->error);
-        }
-        // printf($user[0]);
         return $user;
     }
 
-    public function getDeckCards($deckID)
-    {
-        $myArray = array();
-        if($conn->multi_query("call GetDeckCards('" . $deckID . "');")){
-            do {
-                if($result = $conn->store_result()){
-                    $newRow = array();
-                    while($row = $result->fetch_row()){
-                        if($row === "Error: Not a Valid Deck"){
-                            return $row[0];
-                        } else{
-                            $newRow['cardID'] = $row[0];
-                        }
-                        $myArray[] = $newRow;
-                    }
-                }
-            } while ($conn->next_result());
-        }
-        else {
-            printf("<br>Error: %s\n", $conn->error);
-        }
-        return json_encode($myArray);
-    }
-
-    public function getUserDecks($userID)
-    {
-        $myArray = array();
-        if($conn->multi_query("call GetUserDecks('" . $userID . "');")){
-            do {
-                if($result = $conn->store_result()){
-                    $newRow = array();
-                    while($row = $result->fetch_row()){
-                        if($row === "Error: Not a Valid Deck"){
-                            return $row[0];
-                        } else{
-                            $newRow['deckID'] = $row[0];
-                            $newRow['heroID'] = $row[1];
-                            $newRow['heroImg'] = $row[2];
-                            $newRow['deckName'] = $row[3];
-                        }
-                        $myArray[] = $newRow;
-                    }
-                }
-            } while ($conn->next_result());
-        }
-        else {
-            printf("<br>Error: %s\n", $conn->error);
-        }
-        return json_encode($myArray);
-    }
-
-    public function createDeck($userID,$deckName,$heroID)
-    {
-        if($conn->multi_query("call CreateDeck('" . $userID . "','" . $deckName . "', '" . $heroID . "');")){
-            do {
-                if($result = $conn->store_result()){
-                    $row = $result->fetch_row();
+    public function login($username, $password) {
+        $user = array();
+        if ($result = mysqli_query($this->conn, "call Login('" . $username . "', '" . $password . "');")) {
+            while ($row = mysqli_fetch_row($result)) {
+                if ($row[0] === "Incorrect Username/Password") {
                     return $row[0];
+                } else{
+                    $user['userID']   = $row[0];
+                    $user['username'] = $row[1];
                 }
-            }   while ($conn->next_result());
+            }
         }
-        else {
-            printf("<br>Error: %s\n", $conn->error);
+        return $user;
+    }
+
+    public function getDeckCards($deckID) {
+        $cards = array();
+        if ($result = mysqli_query($this->conn, "call GetDeckCards('" . $deckID . "');")) {
+            while ($row = mysqli_fetch_row($result)) {
+                $newRow = array();
+                if ($row[0] === "Error: Not a Valid Deck") {
+                    return $row[0];
+                } else {
+                  $newRow['cardID'] = $row[0];
+                }
+                $cards[] = $newRow;
+            }
+        }
+        return $cards;
+    }
+
+    public function getUserDecks($userID) {
+        $decks = array();
+        if ($result = mysqli_query($this->conn, "call GetUserDecks('" . $userID . "');")) {
+            while ($row = mysqli_fetch_row($result)) {
+                $newRow = array();
+                if ($row[0] === "Error: Not a valid User ID") {
+                    return $row[0];
+                } else {
+                  $newRow['deckID']   = $row[0];
+                  $newRow['heroID']   = $row[1];
+                  $newRow['heroImg']  = $row[2];
+                  $newRow['deckName'] = $row[3];
+                }
+                $decks[] = $newRow;
+            }
+        }
+        return $decks;
+    }
+
+    public function createDeck($userID, $deckName, $heroID) {
+        if ($result = mysqli_query($this->conn, "call CreateDeck('" . $userID . "','" . $deckName . "', '" . $heroID . "');")) {
+            while ($row = mysqli_fetch_row($result)) {
+                return $row[0];
+            }
         }
     }
 

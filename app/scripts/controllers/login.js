@@ -12,25 +12,38 @@ angular.module('hearthstoneApp')
     $scope.stuff = ['Hey'];
 
     $scope.user = {};
-    $scope.errors = {};
+    $scope.sError = {};
+    $scope.uError = {};
 
     $scope.login = function(form) {
       $scope.submitted = true;
 
       if (form.$valid) {
-        // check length for both
+        if ($scope.user.username == undefined ||
+            $scope.user.password == undefined ||
+            $scope.user.username.length == 0 ||
+            $scope.user.password.length == 0) {
+          $scope.uError = 'Please enter a username and password';
+          $scope.userError = true;
+          return;
+        } else if ($scope.user.username.length > 15 || $scope.user.password.length > 20) {
+          $scope.uError = 'Username must be 15 characters or less and password must 20 characters or less';
+          $scope.userError = true;
+          return;
+        } else {
+          $scope.userError = false;
+        }
+
         Auth.login({
           username: $scope.user.username,
           password: $scope.user.password
         })
         .then(function(data) {
-          // this does'nt actually work?? No promise being returned?
-          console.log('yoooooo');
-          console.log($location);
           $location.path('/');
         })
-        .catch( function(err) {
-          $scope.errors.other = err.message;
+        .catch(function(error) {
+          $scope.serverError = true;
+          $scope.sError = error;
         });
       }
     };
@@ -38,18 +51,32 @@ angular.module('hearthstoneApp')
     $scope.signUp = function(form) {
       $scope.submitted = true;
 
+      if ($scope.user.username == undefined ||
+          $scope.user.password == undefined ||
+          $scope.user.username.length == 0 ||
+          $scope.user.password.length == 0) {
+        $scope.uError = 'Please enter a username and password';
+        $scope.userError = true;
+        return;
+      } else if ($scope.user.username.length > 15 || $scope.user.password.length > 20) {
+        $scope.uError = 'Username must be 15 characters or less and password must 20 characters or less';
+        $scope.userError = true;
+        return;
+      } else {
+        $scope.userError = false;
+      }
+
       if(form.$valid) {
         Auth.signUp({
           username: $scope.user.username,
           password: $scope.user.password
         })
-        .then(function() {
-          // Account created, redirect to home
+        .then(function(data) {
           $location.path('/');
         })
-        .catch( function(err) {
-          err = err.data;
-          $scope.errors = {};
+        .catch(function(error) {
+          $scope.serverError = true;
+          $scope.sError = error;
         });
       }
     };

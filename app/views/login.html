@@ -15,11 +15,12 @@
         </div>
 
         <div class="form-group has-error">
-          <p class="help-block" ng-show="submitted">
-            Please enter a username and password
+          <!-- Check this first one for a different kind of error -->
+          <p class="help-block" ng-show="submitted && userError">
+            {{ uError }}
           </p>
-          <p class="help-block">
-            {{ errors.other }}
+          <p class="help-block" ng-show="submitted && serverError">
+            {{ sError }}
           </p>
         </div>
 
