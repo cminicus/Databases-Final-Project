@@ -74,7 +74,7 @@ class Application extends Slim
         $this->get('/createuser/:username/:password', function ($username, $password) {
             $userData = $this->createUser($username, $password);
             if ($userData === "Error: Username already exists") {
-              $this->response->setStatus(500);
+                $this->response->setStatus(500);
             }
             echo json_encode($userData);
         });
@@ -140,12 +140,13 @@ class Application extends Slim
                 if ($row[0] === "Error: Username already exists") {
                     return $row[0];
                 } else {
-                    $user['userID'] = $row[0];
+                    $user['userID']   = $row[0];
                     $user['username'] = $row[1];
                 }
-          }
-          return $user;
+            }
+            return $user;
         }
+        // return here? Check for empty?
     }
 
     // public function createUser($username, $password)

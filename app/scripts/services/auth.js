@@ -19,7 +19,6 @@ angular.module('hearthstoneApp')
         console.log("login");
         currentUser = {
           'username': 'Clayton',
-          'password': 'yo',
           'userID': 2
         }
         $location.path('/');
@@ -44,7 +43,7 @@ angular.module('hearthstoneApp')
           deferred.reject(error);
           return cb(error);
         }.bind(this));
-        
+
         return deferred.promise;
       },
 
