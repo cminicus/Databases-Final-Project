@@ -136,6 +136,13 @@ class Application extends Slim
             // $this->response->setBody($jsonData);
             echo $jsonData;
         });
+
+        $this->get('/filtercards/:cardName/:mana/:cardType/:cardClass/:mech', function ($cardName,$mana,$cardType,$cardClass,$mech) {
+            $jsonData = filterCards($cardName,$mana,$cardType,$cardClass,$mech);
+            // $this->response->headers->set('Content-Type', 'application/json');
+            // $this->response->setBody($jsonData);
+            echo $jsonData;
+        });
     }
 
     public function handleNotFound()
@@ -339,6 +346,34 @@ class Application extends Slim
                 }
             }   while ($conn->next_result());
         }
+        else {
+            printf("<br>Error: %s\n", $conn->error);
+        }
+    }
+
+    public function filterCards($cardName,$mana,$cardType,$cardClass,$mech) {
+        $cards = array();
+        if($conn->multi_query("call FilterCards('" . $cardName . "','" . $mana . "','" . $cardType . "','" . $cardClass . "','" . $mech . "');")){
+            do {
+                if($result = $conn->store_result()){
+                    $newRow = array();
+                    while($row = $result->fetch_row()){
+                        $newRow['cardID'] = $row[0];
+                        $newRow['expansionID'] = $row[1];
+                        $newRow['manaCost'] = $row[2];
+                        $newRow['name'] = $row[3];
+                        $newRow['classID'] = $row[4];
+                        $newRow['rarity'] = $row[5];
+                        $newRow['img'] = $row[6];
+                        $newRow['imgGold'] = $row[7];
+                        $newRow['cardType'] = $row[8];
+                        $newRow['cardText'] = $row[9];
+                    }
+                    $cards[] = $newRow;
+                }
+            } while ($conn->next_result());
+        }
+        return $cards;
         else {
             printf("<br>Error: %s\n", $conn->error);
         }
